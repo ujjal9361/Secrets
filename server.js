@@ -1,7 +1,10 @@
 //Importing modules
 const express=require('express');
 const mongoose=require('mongoose');
-const md5=require('md5'); //Module for hash 
+
+//Bcrypt config
+const bcrypt=require('bcrypt');//Module for hash 
+const saltRounds=10;
 
 //Importing models
 const User=require("./models/user.js")
@@ -40,13 +43,13 @@ app.route("/login")
         .post((req,res)=>{
             User.findOne({username:req.body.username},(err,foundUser)=>{
                 if(foundUser){
-                    User.findOne({username:req.body.username,password:md5(req.body.password)},(err,fetchedUser)=>{
-                        if(fetchedUser){
-                            res.render("secrets")
-                        }
-                        else{
-                            res.send("Incorrect password.")
-                        }
+                    bcrypt.compare(req.body.password,foundUser.password,(err,result)=>{
+                        if(result){
+                                res.render("secrets")
+                            }
+                            else{
+                                res.send("Incorrect password.")
+                            }
                     })
                 }
                 else{   
@@ -67,12 +70,15 @@ app.route("/register")
                         res.send("Email already exists..Log in to use your existing email");
                     }
                     else{
-                        const newUser=new User({
-                            username:req.body.username,
-                            password:md5(req.body.password)
+                        bcrypt.hash(req.body.password,saltRounds,(err,hash)=>{
+                            const newUser=new User({
+                                username:req.body.username,
+                                password:hash
+                            })
+                                newUser.save();
+                                res.render("secrets");
                         })
-                        newUser.save();
-                        res.render("secrets");
+                        
                     }
                 })
             })
