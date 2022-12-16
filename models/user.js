@@ -1,7 +1,7 @@
 require('dotenv').config();//For using environment variables
 
 const mongoose=require('mongoose');
-const encrypt=require('mongoose-encryption');
+const md5=require('md5');
 
 
 const userSchema=new mongoose.Schema({
@@ -14,8 +14,6 @@ const userSchema=new mongoose.Schema({
         required:true
     }
 })
-const secret=process.env.SECRET;
-userSchema.plugin(encrypt,{secret:secret,encryptedFields:['password']})
 const User=mongoose.model("User",userSchema);
 
 module.exports=User;

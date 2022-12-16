@@ -1,7 +1,7 @@
 //Importing modules
-require('dotenv').config();//For using environment variables
 const express=require('express');
 const mongoose=require('mongoose');
+const md5=require('md5'); //Module for hash 
 
 //Importing models
 const User=require("./models/user.js")
@@ -40,7 +40,7 @@ app.route("/login")
         .post((req,res)=>{
             User.findOne({username:req.body.username},(err,foundUser)=>{
                 if(foundUser){
-                    User.findOne({username:req.body.username,password:req.body.password},(err,fetchedUser)=>{
+                    User.findOne({username:req.body.username,password:md5(req.body.password)},(err,fetchedUser)=>{
                         if(fetchedUser){
                             res.render("secrets")
                         }
@@ -69,7 +69,7 @@ app.route("/register")
                     else{
                         const newUser=new User({
                             username:req.body.username,
-                            password:req.body.password
+                            password:md5(req.body.password)
                         })
                         newUser.save();
                         res.render("secrets");
